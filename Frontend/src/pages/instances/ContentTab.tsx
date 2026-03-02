@@ -8,18 +8,18 @@ import {
 import { useAccentColor } from '@/contexts/AccentColorContext';
 import { ipc, type ModInfo as CurseForgeModInfo } from '@/lib/ipc';
 import { Button, IconButton, LinkButton, SelectableCheckbox } from '@/components/ui/Controls';
-import type { InstalledVersionInfo, ModInfo, InstanceTab } from '@/types';
+import type { InstalledVersionInfo, InstalledModInfo, InstanceTab } from '@/types';
 
 export interface ContentTabProps {
   selectedInstance: InstalledVersionInfo | null;
   // Mod state
-  installedMods: ModInfo[];
-  filteredMods: ModInfo[];
+  installedMods: InstalledModInfo[];
+  filteredMods: InstalledModInfo[];
   isLoadingMods: boolean;
   modsSearchQuery: string;
   setModsSearchQuery: (query: string) => void;
   selectedMods: Set<string>;
-  modsWithUpdates: ModInfo[];
+  modsWithUpdates: InstalledModInfo[];
   updateCount: number;
   modDetailsCache: Record<string, CurseForgeModInfo | null>;
   // Actions
@@ -28,9 +28,9 @@ export interface ContentTabProps {
   handleShiftSelect: (index: number) => void;
   selectOnlyMod: (modId: string, index: number) => void;
   selectAllMods: () => void;
-  handleToggleMod: (mod: ModInfo) => Promise<void>;
+  handleToggleMod: (mod: InstalledModInfo) => Promise<void>;
   handleBulkToggleMods: (enabled: boolean) => Promise<void>;
-  setModToDelete: (mod: ModInfo | null) => void;
+  setModToDelete: (mod: InstalledModInfo | null) => void;
   setShowBulkUpdateConfirm: (show: boolean) => void;
   setShowBulkDeleteConfirm: (show: boolean) => void;
   onTabChange?: (tab: InstanceTab) => void;
@@ -41,11 +41,11 @@ export interface ContentTabProps {
   isBulkTogglingMods: boolean;
   isDeletingMod: boolean;
   // Helpers
-  getDisplayVersion: (mod: ModInfo) => string;
-  isLocalInstalledMod: (mod: ModInfo) => boolean;
-  isTrustedRemoteIdentity: (mod: ModInfo) => boolean;
+  getDisplayVersion: (mod: InstalledModInfo) => string;
+  isLocalInstalledMod: (mod: InstalledModInfo) => boolean;
+  isTrustedRemoteIdentity: (mod: InstalledModInfo) => boolean;
   getCurseForgeUrlFromDetails: (details: CurseForgeModInfo | null | undefined) => string | null;
-  handleOpenModPage: (e: React.MouseEvent, mod: ModInfo) => void;
+  handleOpenModPage: (e: React.MouseEvent, mod: InstalledModInfo) => void;
 }
 
 export const ContentTab: React.FC<ContentTabProps> = ({

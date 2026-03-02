@@ -1,18 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ipc, MirrorInfo } from '@/lib/ipc';
+import { ipc, MirrorInfo, MirrorSpeedTestResult } from '@/lib/ipc';
 
-export interface MirrorSpeedResult {
-  mirrorId: string;
-  mirrorUrl: string;
-  mirrorName: string;
-  pingMs: number;
-  speedMBps: number;
-  isAvailable: boolean;
-  testedAt: string;
-}
+export type { MirrorSpeedTestResult as MirrorSpeedResult };
 
 interface MirrorState {
-  result: MirrorSpeedResult | null;
+  result: MirrorSpeedTestResult | null;
   isTesting: boolean;
 }
 
@@ -54,7 +46,7 @@ export function useMirrorSpeedTests() {
     loadMirrors();
   }, [loadMirrors]);
 
-  const createErrorResult = (mirrorId: string, mirrorName: string): MirrorSpeedResult => ({
+  const createErrorResult = (mirrorId: string, mirrorName: string): MirrorSpeedTestResult => ({
     mirrorId,
     mirrorUrl: '',
     mirrorName,

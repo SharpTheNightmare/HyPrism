@@ -44,14 +44,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = (props) => {
               </div>
             }>
               <SettingsPageContent
-                onClose={() => {}}
                 launcherBranch={props.launcherBranch}
                 onLauncherBranchChange={props.onLauncherBranchChange}
                 rosettaWarning={props.rosettaWarning}
                 onBackgroundModeChange={props.onBackgroundModeChange}
                 onInstanceDeleted={props.onInstanceDeleted}
                 onAuthSettingsChange={props.onAuthSettingsChange}
-                pageMode={true}
                 isGameRunning={props.isGameRunning}
                 onMovingDataChange={props.onMovingDataChange}
               />

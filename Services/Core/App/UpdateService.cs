@@ -9,6 +9,7 @@ using HyPrism.Services.Core.Platform;
 using HyPrism.Services.Game;
 using HyPrism.Services.Game.Instance;
 using HyPrism.Services.Game.Version;
+using static HyPrism.Services.Core.App.LauncherPackageExtractor;
 
 namespace HyPrism.Services.Core.App;
 
@@ -663,45 +664,6 @@ rm -f ""$0""
         await InstallMacOSBinaryUpdateAsync(raw);
     }
 
-    private static string? ExtractZipAndFindWindowsExe(string zipPath)
-    {
-        var extractDir = Path.Combine(Path.GetTempPath(), "HyPrism", "launcher-update", "extract", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(extractDir);
-        ZipFile.ExtractToDirectory(zipPath, extractDir, true);
-
-        var currentExe = Environment.ProcessPath;
-        var preferredName = string.IsNullOrWhiteSpace(currentExe) ? null : Path.GetFileName(currentExe);
-        var exes = Directory.GetFiles(extractDir, "*.exe", SearchOption.AllDirectories);
-
-        if (!string.IsNullOrWhiteSpace(preferredName))
-        {
-            var match = exes.FirstOrDefault(e => string.Equals(Path.GetFileName(e), preferredName, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(match)) return match;
-        }
-
-        return exes.FirstOrDefault();
-    }
-
-    private static string? FindExecutableFile(string rootDir)
-    {
-        try
-        {
-            var files = Directory.GetFiles(rootDir, "*", SearchOption.AllDirectories);
-            var direct = files.FirstOrDefault(f => string.Equals(Path.GetFileName(f), "HyPrism", StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(direct)) return direct;
-
-            return files.FirstOrDefault(f =>
-                !f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) &&
-                !f.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
-                !f.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase) &&
-                !f.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
     private static void TryPickBestAssetForCurrentPlatform(JsonElement release, out string? downloadUrl, out string? assetName)
     {
         downloadUrl = null;
@@ -1314,33 +1276,6 @@ rm -f ""$0""
         {
             Console.WriteLine($"WrapperLaunch error: {ex.Message}");
             return false;
-        }
-    }
-
-    /// <summary>
-    /// Helper: Extract .tar.gz archive (for Linux/Mac releases).
-    /// </summary>
-    private static async Task ExtractTarGz(string archivePath, string destinationDir)
-    {
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "tar",
-                Arguments = $"-xzf \"{archivePath}\" -C \"{destinationDir}\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            }
-        };
-
-        process.Start();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
-        {
-            var error = await process.StandardError.ReadToEndAsync();
-            throw new Exception($"Failed to extract tar.gz: {error}");
         }
     }
 

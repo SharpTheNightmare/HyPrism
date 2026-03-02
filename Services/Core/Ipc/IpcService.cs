@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Runtime.InteropServices;
 using ElectronNET.API;
 using Microsoft.Extensions.DependencyInjection;
 using SixLabors.ImageSharp;
@@ -137,91 +137,6 @@ public class IpcService
         if (win == null) return;
         Electron.IpcMain.Send(win, channel, raw);
     }
-
-    private static int GetSystemMemoryMb()
-    {
-        try
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var memoryStatus = new MemoryStatusEx();
-                if (GlobalMemoryStatusEx(memoryStatus) && memoryStatus.ullTotalPhys > 0)
-                {
-                    return (int)(memoryStatus.ullTotalPhys / (1024 * 1024));
-                }
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                const string memInfoPath = "/proc/meminfo";
-                if (File.Exists(memInfoPath))
-                {
-                    var memTotalLine = File.ReadLines(memInfoPath).FirstOrDefault(line => line.StartsWith("MemTotal:", StringComparison.OrdinalIgnoreCase));
-                    if (!string.IsNullOrWhiteSpace(memTotalLine))
-                    {
-                        var parts = memTotalLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length >= 2 && long.TryParse(parts[1], out var kb) && kb > 0)
-                        {
-                            return (int)(kb / 1024);
-                        }
-                    }
-                }
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                var psi = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = "/usr/sbin/sysctl",
-                    Arguments = "-n hw.memsize",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using var process = System.Diagnostics.Process.Start(psi);
-                if (process != null)
-                {
-                    var output = process.StandardOutput.ReadToEnd().Trim();
-                    process.WaitForExit(2000);
-                    if (process.ExitCode == 0 && long.TryParse(output, out var bytes) && bytes > 0)
-                    {
-                        return (int)(bytes / (1024 * 1024));
-                    }
-                }
-            }
-        }
-        catch
-        {
-        }
-
-        var fallback = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-        if (fallback > 0)
-        {
-            return (int)Math.Max(1024, fallback / (1024 * 1024));
-        }
-
-        return 8192;
-    }
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    private sealed class MemoryStatusEx
-    {
-        public uint dwLength = (uint)Marshal.SizeOf<MemoryStatusEx>();
-        public uint dwMemoryLoad;
-        public ulong ullTotalPhys;
-        public ulong ullAvailPhys;
-        public ulong ullTotalPageFile;
-        public ulong ullAvailPageFile;
-        public ulong ullTotalVirtual;
-        public ulong ullAvailVirtual;
-        public ulong ullAvailExtendedVirtual;
-    }
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatusEx lpBuffer);
 
     public void RegisterAll()
     {
@@ -923,7 +838,7 @@ public class IpcService
                 else
                 {
                     // Handle ZIP file import (existing logic)
-                    await ImportZipFileAsync(filePath, instanceService);
+                    await instanceService.ImportFromZipAsync(filePath);
                 }
                 
                 Logger.Success("IPC", $"Instance imported successfully");
@@ -1506,7 +1421,7 @@ public class IpcService
                 javaArguments = settings.GetJavaArguments(),
                 useCustomJava = settings.GetUseCustomJava(),
                 customJavaPath = settings.GetCustomJavaPath(),
-                systemMemoryMb = GetSystemMemoryMb(),
+                systemMemoryMb = SystemInfoService.GetSystemMemoryMb(),
                 dataDirectory = appPath.AppDir,
                 instanceDirectory = settings.GetInstanceDirectory(),
                 gpuPreference = settings.GetGpuPreference(),
@@ -3237,74 +3152,6 @@ public class IpcService
     }
 
     /// <summary>
-    /// Imports a ZIP file as a new instance.
-    /// </summary>
-    private async Task ImportZipFileAsync(string zipPath, IInstanceService instanceService)
-    {
-        // Extract to a temp location first to check structure
-        var tempDir = Path.Combine(Path.GetTempPath(), $"hyprism-import-{Guid.NewGuid()}");
-        Directory.CreateDirectory(tempDir);
-        
-        await Task.Run(() => ZipFile.ExtractToDirectory(zipPath, tempDir, true));
-        
-        // Determine target path - check if zip has meta.json metadata
-        var metaPath = Path.Combine(tempDir, "meta.json");
-        var branch = "release";
-        var version = 0;
-        string? existingId = null;
-
-        if (File.Exists(metaPath))
-        {
-            var meta = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(metaPath), JsonOpts);
-            branch = meta?.TryGetValue("branch", out var b) == true ? b.GetString() ?? "release" : "release";
-            if (meta?.TryGetValue("version", out var v) == true) version = v.GetInt32();
-            if (meta?.TryGetValue("id", out var idEl) == true) existingId = idEl.GetString();
-        }
-        
-        // Check if instance with this ID already exists
-        var existingInstances = instanceService.GetInstalledInstances();
-        var idAlreadyExists = !string.IsNullOrEmpty(existingId) && 
-            existingInstances.Any(i => i.Id == existingId);
-        
-        // Generate new ID if existing one conflicts or doesn't exist
-        var newInstanceId = idAlreadyExists || string.IsNullOrEmpty(existingId) 
-            ? Guid.NewGuid().ToString() 
-            : existingId;
-        
-        var targetPath = instanceService.CreateInstanceDirectory(branch, newInstanceId);
-        
-        // Update meta.json with new ID if it was changed
-        if (File.Exists(metaPath) && (idAlreadyExists || string.IsNullOrEmpty(existingId)))
-        {
-            var metaContent = JsonSerializer.Deserialize<Dictionary<string, object>>(File.ReadAllText(metaPath), JsonOpts);
-            if (metaContent != null)
-            {
-                metaContent["id"] = newInstanceId;
-                File.WriteAllText(metaPath, JsonSerializer.Serialize(metaContent, JsonOpts));
-                Logger.Info("IPC", $"Updated instance ID from '{existingId}' to '{newInstanceId}'");
-            }
-        }
-        
-        // Move contents from temp to target
-        foreach (var file in Directory.GetFiles(tempDir))
-        {
-            var destFile = Path.Combine(targetPath, Path.GetFileName(file));
-            File.Move(file, destFile, true);
-        }
-        foreach (var dir in Directory.GetDirectories(tempDir))
-        {
-            var destDir = Path.Combine(targetPath, Path.GetFileName(dir));
-            if (Directory.Exists(destDir)) Directory.Delete(destDir, true);
-            Directory.Move(dir, destDir);
-        }
-        
-        // Clean up temp directory
-        try { Directory.Delete(tempDir, true); } catch { /* ignore */ }
-        
-        Logger.Success("IPC", $"Imported ZIP instance to: {targetPath}");
-    }
-
-    /// <summary>
     /// Imports a PWR file as a new instance using Butler.
     /// </summary>
     private async Task ImportPwrFileAsync(string pwrPath, IInstanceService instanceService)
@@ -3314,7 +3161,7 @@ public class IpcService
         // Try to parse version info from the filename
         // Common patterns: v{version}-{os}-{arch}.pwr, 0_to_{version}.pwr, {version}.pwr
         var fileName = Path.GetFileNameWithoutExtension(pwrPath);
-        var version = TryParseVersionFromPwrFilename(fileName);
+        var version = InstanceService.TryParseVersionFromPwrFilename(fileName);
         var branch = "release"; // Default to release branch
         
         // Generate a new instance ID
@@ -3344,34 +3191,6 @@ public class IpcService
         instanceService.SaveInstanceMeta(targetPath, meta);
         
         Logger.Success("IPC", $"Imported PWR instance to: {targetPath}");
-    }
-
-    /// <summary>
-    /// Tries to parse version number from PWR filename.
-    /// Supports patterns: v{version}-{os}-{arch}, 0_to_{version}, {version}, etc.
-    /// </summary>
-    private static int TryParseVersionFromPwrFilename(string filename)
-    {
-        // Pattern: v{version}-{os}-{arch} (e.g., v123-linux-x64)
-        var versionMatch = System.Text.RegularExpressions.Regex.Match(filename, @"^v(\d+)");
-        if (versionMatch.Success && int.TryParse(versionMatch.Groups[1].Value, out var v1))
-            return v1;
-        
-        // Pattern: 0_to_{version} or {from}_to_{version} (e.g., 0_to_456)
-        var patchMatch = System.Text.RegularExpressions.Regex.Match(filename, @"_to_(\d+)");
-        if (patchMatch.Success && int.TryParse(patchMatch.Groups[1].Value, out var v2))
-            return v2;
-        
-        // Pattern: just a number (e.g., 123)
-        if (int.TryParse(filename, out var v3))
-            return v3;
-        
-        // Pattern: number at start (e.g., 123-something)
-        var startMatch = System.Text.RegularExpressions.Regex.Match(filename, @"^(\d+)");
-        if (startMatch.Success && int.TryParse(startMatch.Groups[1].Value, out var v4))
-            return v4;
-        
-        return 0; // Unknown version
     }
 
     // #endregion

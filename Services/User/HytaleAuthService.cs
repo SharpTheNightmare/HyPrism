@@ -180,12 +180,7 @@ public class HytaleAuthService : IHytaleAuthService
     public void Logout()
     {
         CurrentSession = null;
-        var path = GetSessionFilePath();
-        if (File.Exists(path))
-        {
-            try { File.Delete(path); }
-            catch (Exception ex) { Logger.Warning("HytaleAuth", $"Failed to delete session file: {ex.Message}"); }
-        }
+        TokenStore.Delete(GetSessionFilePath());
         Logger.Info("HytaleAuth", "Logged out");
     }
     
@@ -571,22 +566,12 @@ public class HytaleAuthService : IHytaleAuthService
     /// Gets the session file path for the current profile.
     /// Falls back to app root if no profile is active (legacy behavior).
     /// </summary>
-    private string GetSessionFilePath()
-    {
-        var profileFolder = GetCurrentProfileFolder();
-        if (profileFolder != null)
-        {
-            Directory.CreateDirectory(profileFolder);
-            return Path.Combine(profileFolder, "hytale_session.json");
-        }
-        // Fallback to root (for migration or no profile case)
-        return Path.Combine(_appDir, "hytale_session.json");
-    }
+    private string GetSessionFilePath() => TokenStore.GetSessionFilePath(GetCurrentProfileFolder(), _appDir);
 
     /// <summary>
     /// Gets the old (legacy) session file path at app root.
     /// </summary>
-    private string GetLegacySessionFilePath() => Path.Combine(_appDir, "hytale_session.json");
+    private string GetLegacySessionFilePath() => TokenStore.GetLegacySessionFilePath(_appDir);
 
     /// <summary>
     /// Migrates old global session file to current profile folder if needed.
@@ -779,33 +764,14 @@ public class HytaleAuthService : IHytaleAuthService
     private void SaveSession()
     {
         if (CurrentSession == null) return;
-        try
-        {
-            var json = JsonSerializer.Serialize(CurrentSession, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(GetSessionFilePath(), json);
-        }
-        catch (Exception ex)
-        {
-            Logger.Warning("HytaleAuth", $"Failed to save session: {ex.Message}");
-        }
+        TokenStore.Save(GetSessionFilePath(), CurrentSession);
     }
 
     private void LoadSession()
     {
-        var path = GetSessionFilePath();
-        if (!File.Exists(path)) return;
-        try
-        {
-            var json = File.ReadAllText(path);
-            CurrentSession = JsonSerializer.Deserialize<HytaleAuthSession>(json);
-            if (CurrentSession != null)
-                Logger.Info("HytaleAuth", $"Restored session for {CurrentSession.Username}");
-        }
-        catch (Exception ex)
-        {
-            Logger.Warning("HytaleAuth", $"Failed to load session: {ex.Message}");
-            CurrentSession = null;
-        }
+        CurrentSession = TokenStore.Load(GetSessionFilePath());
+        if (CurrentSession != null)
+            Logger.Info("HytaleAuth", $"Restored session for {CurrentSession.Username}");
     }
 
     /// <summary>

@@ -238,4 +238,12 @@ public interface IInstanceService
     /// <param name="version">The new version number.</param>
     /// <returns>True if the operation succeeded.</returns>
     bool ChangeInstanceVersion(string instanceId, string branch, int version);
+
+    /// <summary>
+    /// Imports a ZIP archive as a new game instance.
+    /// Extracts the archive, reads meta.json for branch/version/id info,
+    /// deduplicates instance IDs, and moves the contents to the instances directory.
+    /// </summary>
+    /// <param name="zipPath">The path to the ZIP archive to import.</param>
+    Task ImportFromZipAsync(string zipPath);
 }

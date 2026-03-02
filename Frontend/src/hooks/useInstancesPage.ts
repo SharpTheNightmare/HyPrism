@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ipc, InstalledInstance, type ModInfo as CurseForgeModInfo, type SaveInfo } from '@/lib/ipc';
-import type { InstalledVersionInfo, InstanceTab, ModInfo } from '@/types';
+import type { InstalledVersionInfo, InstanceTab, InstalledModInfo } from '@/types';
 import { GameBranch } from '@/constants/enums';
 import { 
   useInstanceActions, 
@@ -105,7 +105,7 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
   // ============================================================================
   
   const [instanceToDelete, setInstanceToDelete] = useState<InstalledVersionInfo | null>(null);
-  const [modToDelete, setModToDelete] = useState<ModInfo | null>(null);
+  const [modToDelete, setModToDelete] = useState<InstalledModInfo | null>(null);
   const [showBulkUpdateConfirm, setShowBulkUpdateConfirm] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -398,14 +398,14 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
   // Mod Helpers
   // ============================================================================
   
-  const isLocalInstalledMod = useCallback((mod: ModInfo): boolean => {
+  const isLocalInstalledMod = useCallback((mod: InstalledModInfo): boolean => {
     if (typeof mod.id === 'string' && mod.id.startsWith('local-')) return true;
     if (String(mod.version || '').toLowerCase() === 'local') return true;
     if (String(mod.author || '').toLowerCase() === 'local file') return true;
     return false;
   }, []);
 
-  const isTrustedRemoteIdentity = useCallback((mod: ModInfo): boolean => {
+  const isTrustedRemoteIdentity = useCallback((mod: InstalledModInfo): boolean => {
     if (!isLocalInstalledMod(mod)) return true;
     if (mod.curseForgeId != null) return true;
     if (mod.slug && mod.slug.trim()) return true;
@@ -426,7 +426,7 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
     return m?.[1] ?? '';
   }, []);
 
-  const getDisplayVersion = useCallback((mod: ModInfo): string => {
+  const getDisplayVersion = useCallback((mod: InstalledModInfo): string => {
     const v = String(mod.version || '').trim();
     if (!isLocalInstalledMod(mod)) return v || '-';
     if (v && v.toLowerCase() !== 'local') return v;
@@ -442,7 +442,7 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
     return null;
   }, []);
 
-  const getCurseForgeUrl = useCallback((mod: ModInfo): string => {
+  const getCurseForgeUrl = useCallback((mod: InstalledModInfo): string => {
     if (mod.slug) return `https://www.curseforge.com/hytale/mods/${mod.slug}`;
     if (isLocalInstalledMod(mod)) {
       return `https://www.curseforge.com/hytale/mods/search?search=${encodeURIComponent(String(mod.name || ''))}`;
@@ -452,7 +452,7 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
     return `https://www.curseforge.com/hytale/mods/search?search=${encodeURIComponent(String(id || mod.name))}`;
   }, [isLocalInstalledMod]);
 
-  const handleOpenModPage = useCallback((e: React.MouseEvent, mod: ModInfo) => {
+  const handleOpenModPage = useCallback((e: React.MouseEvent, mod: InstalledModInfo) => {
     e.preventDefault();
     e.stopPropagation();
     const cached = modManager.modDetailsCache[mod.id];
@@ -464,7 +464,7 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
     ipc.browser.open(getCurseForgeUrl(mod));
   }, [getCurseForgeUrl, getCurseForgeUrlFromDetails, modManager.modDetailsCache]);
 
-  const getCurseForgeModId = useCallback((mod: ModInfo): string => {
+  const getCurseForgeModId = useCallback((mod: InstalledModInfo): string => {
     if (typeof mod.curseForgeId === 'number' && Number.isFinite(mod.curseForgeId)) return String(mod.curseForgeId);
     if (typeof mod.id === 'string' && mod.id.startsWith('cf-')) return mod.id.replace('cf-', '');
     return mod.id;
@@ -474,7 +474,7 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
   // Prefetch Mod Details
   // ============================================================================
   
-  const prefetchModDetails = useCallback(async (mods: ModInfo[]) => {
+  const prefetchModDetails = useCallback(async (mods: InstalledModInfo[]) => {
     const toFetch = mods.filter((m) => modManager.modDetailsCache[m.id] === undefined);
     if (toFetch.length === 0) return;
 

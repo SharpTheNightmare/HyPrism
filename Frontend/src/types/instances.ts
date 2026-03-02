@@ -1,6 +1,6 @@
 import type { InstanceValidationDetails } from '@/lib/ipc';
 
-export interface ModInfo {
+export interface InstalledModInfo {
   id: string;
   name: string;
   slug?: string;

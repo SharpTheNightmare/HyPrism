@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { ipc, type ModInfo as CurseForgeModInfo } from '@/lib/ipc';
-import type { InstalledVersionInfo, ModInfo } from '@/types';
+import type { InstalledVersionInfo, InstalledModInfo } from '@/types';
 import { getInstanceInstalledMods, checkInstanceModUpdates, uninstallInstanceMod } from './useInstanceActions';
 
 /**
  * Normalize backend mod payload casing and defaults.
  */
-export function normalizeInstalledMods(mods: unknown[]): ModInfo[] {
+export function normalizeInstalledMods(mods: unknown[]): InstalledModInfo[] {
   return (mods || []).map((m: unknown) => {
     const mod = m as Record<string, unknown>;
 
@@ -38,7 +38,7 @@ export function normalizeInstalledMods(mods: unknown[]): ModInfo[] {
       fileId: typeof fileId === 'number' && Number.isFinite(fileId) ? fileId : undefined,
       latestVersion: mod.latestVersion as string || mod.LatestVersion as string,
       latestFileId: typeof latestFileId === 'number' && Number.isFinite(latestFileId) ? latestFileId : undefined,
-    } as ModInfo;
+    } as InstalledModInfo;
   });
 }
 
@@ -53,9 +53,9 @@ export interface UseModManagerOptions {
  * Extracted from InstancesPage to reduce component complexity.
  */
 export function useModManager({ selectedInstance, setMessage, t }: UseModManagerOptions) {
-  const [installedMods, setInstalledMods] = useState<ModInfo[]>([]);
+  const [installedMods, setInstalledMods] = useState<InstalledModInfo[]>([]);
   const [isLoadingMods, setIsLoadingMods] = useState(false);
-  const [modsWithUpdates, setModsWithUpdates] = useState<ModInfo[]>([]);
+  const [modsWithUpdates, setModsWithUpdates] = useState<InstalledModInfo[]>([]);
   const [updateCount, setUpdateCount] = useState(0);
   const [modsSearchQuery, setModsSearchQuery] = useState('');
   const [selectedMods, setSelectedMods] = useState<Set<string>>(new Set());
@@ -79,7 +79,7 @@ export function useModManager({ selectedInstance, setMessage, t }: UseModManager
     contentSelectionAnchorRef.current = null;
   }, [selectedInstance?.id]);
 
-  const buildModSignature = useCallback((mods: ModInfo[]): string => {
+  const buildModSignature = useCallback((mods: InstalledModInfo[]): string => {
     return (mods || [])
       .map((m) => {
         const parts = [
@@ -223,7 +223,7 @@ export function useModManager({ selectedInstance, setMessage, t }: UseModManager
   }, []);
 
   // Mod deletion
-  const handleDeleteMod = useCallback(async (mod: ModInfo) => {
+  const handleDeleteMod = useCallback(async (mod: InstalledModInfo) => {
     if (!selectedInstance) return false;
     try {
       await uninstallInstanceMod(mod.id, selectedInstance.branch, selectedInstance.version, selectedInstance.id);
@@ -259,7 +259,7 @@ export function useModManager({ selectedInstance, setMessage, t }: UseModManager
   }, [loadInstalledMods, selectedInstance, selectedMods, setMessage, t]);
 
   // Toggle mod enabled state
-  const handleToggleMod = useCallback(async (mod: ModInfo) => {
+  const handleToggleMod = useCallback(async (mod: InstalledModInfo) => {
     if (!selectedInstance) return;
     try {
       const ok = await ipc.mods.toggle({

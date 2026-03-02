@@ -8,6 +8,9 @@ import { Language } from '@/constants/enums';
 import { backgroundImages } from '@/constants/backgrounds';
 import { generateRandomNick } from '@/utils/randomNick';
 import type { Contributor } from './useSettings';
+import type { OnboardingPhase, OnboardingStep, OnboardingState } from '@/types/onboarding';
+
+export type { OnboardingPhase, OnboardingStep, OnboardingState };
 
 // ============================================================================
 // Types
@@ -17,18 +20,6 @@ export interface GpuAdapter {
   name: string;
   vendor: string;
   type: string;
-}
-
-export type OnboardingPhase = 'splash' | 'auth' | 'warning' | 'setup';
-export type OnboardingStep = 'language' | 'profile' | 'hardware' | 'visual' | 'about';
-
-export interface OnboardingState {
-  phase: OnboardingPhase;
-  currentStep: string;
-  username: string;
-  backgroundMode: string;
-  selectedLanguage: string;
-  isAuthenticated: boolean;
 }
 
 export interface UseOnboardingOptions {

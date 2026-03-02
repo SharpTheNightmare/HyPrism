@@ -8,15 +8,15 @@ import {
 import { useAccentColor } from '@/contexts/AccentColorContext';
 import { invoke, type ModInfo as CurseForgeModInfo, type ModScreenshot } from '@/lib/ipc';
 import { Button, IconButton, SelectableCheckbox } from '@/components/ui/Controls';
-import type { ModInfo } from '@/types';
+import type { InstalledModInfo } from '@/types';
 
 interface BulkOperationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  modList: ModInfo[];
+  modList: InstalledModInfo[];
   modDetailsCache: Record<string, CurseForgeModInfo | null>;
-  prefetchModDetails: (mods: ModInfo[]) => Promise<void>;
-  getCurseForgeModId: (mod: ModInfo) => string;
+  prefetchModDetails: (mods: InstalledModInfo[]) => Promise<void>;
+  getCurseForgeModId: (mod: InstalledModInfo) => string;
 }
 
 interface BulkUpdateModalProps extends BulkOperationModalProps {
@@ -57,7 +57,7 @@ export const BulkUpdateModal: React.FC<BulkUpdateModalProps> = ({
     void prefetchModDetails(modList);
   }, [isOpen, modList, prefetchModDetails]);
 
-  const loadChangelogFor = useCallback(async (mod: ModInfo) => {
+  const loadChangelogFor = useCallback(async (mod: InstalledModInfo) => {
     if (changelogCache[mod.id]?.status === 'loading' || changelogCache[mod.id]?.status === 'ready') return;
     if (typeof mod.latestFileId !== 'number' || !Number.isFinite(mod.latestFileId)) return;
 

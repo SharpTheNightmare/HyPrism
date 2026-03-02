@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { ipc, invoke, send, type SaveInfo } from '@/lib/ipc';
-import type { InstalledVersionInfo, ModInfo } from '@/types';
+import { ipc, invoke, type SaveInfo } from '@/lib/ipc';
+import type { InstalledVersionInfo, InstalledModInfo } from '@/types';
 
 /**
  * IPC wrapper functions for instance operations.
@@ -9,7 +9,7 @@ import type { InstalledVersionInfo, ModInfo } from '@/types';
 
 export const exportInstance = async (instanceId: string): Promise<string> => {
   try {
-    return await invoke<string>('hyprism:instance:export', { instanceId });
+    return await ipc.instance.export({ instanceId });
   } catch (e) {
     console.warn('[IPC] ExportInstance:', e);
     return '';
@@ -18,7 +18,7 @@ export const exportInstance = async (instanceId: string): Promise<string> => {
 
 export const deleteInstance = async (instanceId: string, branch: string, version: number): Promise<boolean> => {
   try {
-    return await invoke<boolean>('hyprism:instance:delete', { instanceId, branch, version });
+    return await ipc.instance.delete({ instanceId, branch, version });
   } catch (e) {
     console.warn('[IPC] DeleteGame:', e);
     return false;
@@ -26,12 +26,12 @@ export const deleteInstance = async (instanceId: string, branch: string, version
 };
 
 export const openInstanceFolder = (instanceId: string): void => {
-  send('hyprism:instance:openFolder', { instanceId });
+  ipc.instance.openFolder({ instanceId });
 };
 
 export const importInstanceFromZip = async (): Promise<boolean> => {
   try {
-    return await invoke<boolean>('hyprism:instance:import');
+    return await ipc.instance.import();
   } catch (e) {
     console.warn('[IPC] ImportInstanceFromZip:', e);
     return false;
@@ -42,9 +42,9 @@ export const getCustomInstanceDir = async (): Promise<string> => {
   return (await ipc.settings.get()).dataDirectory ?? '';
 };
 
-export const getInstanceInstalledMods = async (branch: string, version: number, instanceId?: string): Promise<ModInfo[]> => {
+export const getInstanceInstalledMods = async (branch: string, version: number, instanceId?: string): Promise<unknown[]> => {
   try {
-    return await invoke<ModInfo[]>('hyprism:mods:installed', { branch, version, instanceId });
+    return await ipc.mods.installed({ branch, version, instanceId });
   } catch (e) {
     console.warn('[IPC] GetInstanceInstalledMods:', e);
     return [];
@@ -53,7 +53,7 @@ export const getInstanceInstalledMods = async (branch: string, version: number, 
 
 export const uninstallInstanceMod = async (modId: string, branch: string, version: number, instanceId?: string): Promise<boolean> => {
   try {
-    return await invoke<boolean>('hyprism:mods:uninstall', { modId, branch, version, instanceId });
+    return await ipc.mods.uninstall({ modId, branch, version, instanceId });
   } catch (e) {
     console.warn('[IPC] UninstallInstanceMod:', e);
     return false;
@@ -61,12 +61,12 @@ export const uninstallInstanceMod = async (modId: string, branch: string, versio
 };
 
 export const openInstanceModsFolder = (instanceId: string): void => {
-  send('hyprism:instance:openModsFolder', { instanceId });
+  ipc.instance.openModsFolder({ instanceId });
 };
 
-export const checkInstanceModUpdates = async (branch: string, version: number, instanceId?: string): Promise<ModInfo[]> => {
+export const checkInstanceModUpdates = async (branch: string, version: number, instanceId?: string): Promise<unknown[]> => {
   try {
-    return await invoke<ModInfo[]>('hyprism:mods:checkUpdates', { branch, version, instanceId });
+    return await ipc.mods.checkUpdates({ branch, version, instanceId });
   } catch (e) {
     console.warn('[IPC] CheckInstanceModUpdates:', e);
     return [];
@@ -75,7 +75,7 @@ export const checkInstanceModUpdates = async (branch: string, version: number, i
 
 export const getInstanceSaves = async (instanceId: string, branch: string, version: number): Promise<SaveInfo[]> => {
   try {
-    return await invoke<SaveInfo[]>('hyprism:instance:saves', { instanceId, branch, version });
+    return await ipc.instance.saves({ instanceId, branch, version });
   } catch (e) {
     console.warn('[IPC] GetInstanceSaves:', e);
     return [];
@@ -83,7 +83,7 @@ export const getInstanceSaves = async (instanceId: string, branch: string, versi
 };
 
 export const openSaveFolder = (instanceId: string, branch: string, version: number, saveName: string): void => {
-  send('hyprism:instance:openSaveFolder', { instanceId, branch, version, saveName });
+  ipc.instance.openSaveFolder({ instanceId, branch, version, saveName });
 };
 
 export const deleteSaveFolder = async (instanceId: string, branch: string, version: number, saveName: string): Promise<boolean> => {
@@ -97,7 +97,7 @@ export const deleteSaveFolder = async (instanceId: string, branch: string, versi
 
 export const getInstanceIcon = async (instanceId: string): Promise<string | null> => {
   try {
-    return await invoke<string | null>('hyprism:instance:getIcon', { instanceId });
+    return await ipc.instance.getIcon({ instanceId });
   } catch (e) {
     console.warn('[IPC] GetInstanceIcon:', e);
     return null;
