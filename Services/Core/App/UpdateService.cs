@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using HyPrism.Models;
 using HyPrism.Services.Core.Infrastructure;
-using HyPrism.Services.Core.Platform;
 using HyPrism.Services.Game;
 using HyPrism.Services.Game.Instance;
 using HyPrism.Services.Game.Version;
@@ -24,7 +23,6 @@ namespace HyPrism.Services.Core.App;
 public class UpdateService : IUpdateService
 {
     private const string GitHubApiUrl = "https://api.github.com/repos/hyprismteam/HyPrism/releases";
-    private const string ReleasesPageUrl = "https://github.com/hyprismteam/HyPrism/releases/latest";
     
     private static readonly Lazy<string> _launcherVersion = new(() =>
     {
@@ -43,12 +41,11 @@ public class UpdateService : IUpdateService
     });
     
     private readonly HttpClient _httpClient;
-    private readonly ConfigService _configService;
-    private readonly VersionService _versionService;
-    private readonly InstanceService _instanceService;
-    private readonly BrowserService _browserService;
-    private readonly ProgressNotificationService _progressNotificationService;
-    
+    private readonly IConfigService _configService;
+    private readonly IVersionService _versionService;
+    private readonly IInstanceService _instanceService;
+    private readonly IProgressNotificationService _progressNotificationService;
+
     /// <summary>
     /// Raised when a launcher update is available.
     /// </summary>
@@ -66,21 +63,18 @@ public class UpdateService : IUpdateService
     /// <param name="configService">The configuration service.</param>
     /// <param name="versionService">The version service for version checks.</param>
     /// <param name="instanceService">The instance service for path management.</param>
-    /// <param name="browserService">The browser service for opening URLs.</param>
     /// <param name="progressNotificationService">The progress notification service.</param>
     public UpdateService(
         HttpClient httpClient,
-        ConfigService configService,
-        VersionService versionService,
-        InstanceService instanceService,
-        BrowserService browserService,
-        ProgressNotificationService progressNotificationService)
+        IConfigService configService,
+        IVersionService versionService,
+        IInstanceService instanceService,
+        IProgressNotificationService progressNotificationService)
     {
         _httpClient = httpClient;
         _configService = configService;
         _versionService = versionService;
         _instanceService = instanceService;
-        _browserService = browserService;
         _progressNotificationService = progressNotificationService;
 
         // GitHub API requires a User-Agent; keep this safe even if DI didn't configure it.
@@ -1182,7 +1176,7 @@ rm -f ""$0""
             var archivePath = Path.Combine(wrapperDir, assetName);
 
             // Download archive
-            _progressNotificationService.SendProgress("wrapper-install", 0, "Downloading HyPrism...", null, 0, 100);
+            _progressNotificationService.ReportDownloadProgress("wrapper-install", 0, "Downloading HyPrism...", null, 0, 100);
             
             var response = await _httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
@@ -1197,7 +1191,7 @@ rm -f ""$0""
                 await contentStream.CopyToAsync(fileStream);
             }
 
-            _progressNotificationService.SendProgress("wrapper-install", 50, "Extracting...", null, 50, 100);
+            _progressNotificationService.ReportDownloadProgress("wrapper-install", 50, "Extracting...", null, 50, 100);
 
             // Extract archive
             if (assetName.EndsWith(".tar.gz"))
@@ -1235,13 +1229,13 @@ rm -f ""$0""
             // Cleanup archive
             File.Delete(archivePath);
 
-            _progressNotificationService.SendProgress("wrapper-install", 100, "Installation complete", null, 100, 100);
+            _progressNotificationService.ReportDownloadProgress("wrapper-install", 100, "Installation complete", null, 100, 100);
             return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"WrapperInstallLatest error: {ex.Message}");
-            _progressNotificationService.SendErrorEvent("Wrapper Installation Error", ex.Message, null);
+            _progressNotificationService.ReportError("Wrapper Installation Error", ex.Message, null);
             return false;
         }
     }

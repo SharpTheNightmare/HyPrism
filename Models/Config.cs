@@ -183,8 +183,9 @@ public class Config
     public string CurseForgeKey { get; set; } = "";
     
     /// <summary>
-    /// Legacy field kept for backward compatibility with older configs.
-    /// Mirror selection is now automatic at runtime and this value is ignored.
+    /// [DEPRECATED] Mirror selection is now automatic at runtime and this value is ignored.
+    /// Kept for reading old configs without JSON parse errors.
     /// </summary>
-    public string PreferredMirror { get; set; } = "estrogen";
+    [Obsolete("Mirror selection is automatic; this field is not read at runtime")]
+    public string PreferredMirror { get; set; } = "";
 }

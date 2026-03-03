@@ -12,16 +12,16 @@ namespace HyPrism.Services.Core.App;
 /// </remarks>
 public class SettingsService : ISettingsService
 {
-    private readonly ConfigService _configService;
-    private readonly LocalizationService _localizationService;
-    
+    private readonly IConfigService _configService;
+    private readonly ILocalizationService _localizationService;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SettingsService"/> class.
     /// Applies the saved language setting to the localization service on startup.
     /// </summary>
     /// <param name="configService">The configuration service for persisting settings.</param>
     /// <param name="localizationService">The localization service for language management.</param>
-    public SettingsService(ConfigService configService, LocalizationService localizationService)
+    public SettingsService(IConfigService configService, ILocalizationService localizationService)
     {
         _configService = configService;
         _localizationService = localizationService;

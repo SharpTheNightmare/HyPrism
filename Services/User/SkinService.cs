@@ -22,9 +22,8 @@ public class SkinService : ISkinService
     private bool _skinProtectionEnabled;
     private readonly object _skinProtectionLock = new object();
 
-    // Delegates to access AppService state - REPLACED BY DI SERVICES
-    private readonly ConfigService _configService;
-    private readonly InstanceService _instanceService;
+    private readonly IConfigService _configService;
+    private readonly IInstanceService _instanceService;
     private readonly string _appDir;
 
     /// <summary>
@@ -35,8 +34,8 @@ public class SkinService : ISkinService
     /// <param name="instanceService">The game instance service.</param>
     public SkinService(
         AppPathConfiguration appPath,
-        ConfigService configService,
-        InstanceService instanceService)
+        IConfigService configService,
+        IInstanceService instanceService)
     {
         _appDir = appPath.AppDir;
         _configService = configService;

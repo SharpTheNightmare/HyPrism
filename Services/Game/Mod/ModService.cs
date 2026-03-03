@@ -49,19 +49,19 @@ public class ModService : IModService
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private readonly ConfigService _configService;
-    private readonly InstanceService _instanceService;
-    private readonly ProgressNotificationService _progressNotificationService;
+    private readonly IConfigService _configService;
+    private readonly IInstanceService _instanceService;
+    private readonly IProgressNotificationService _progressNotificationService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModService"/> class.
     /// </summary>
     public ModService(
-        HttpClient httpClient, 
+        HttpClient httpClient,
         string appDir,
-        ConfigService configService,
-        InstanceService instanceService,
-        ProgressNotificationService progressNotificationService)
+        IConfigService configService,
+        IInstanceService instanceService,
+        IProgressNotificationService progressNotificationService)
     {
         _httpClient = httpClient;
         _appDir = appDir;

@@ -36,10 +36,10 @@ public class GameLauncher : IGameLauncher
     private readonly IDiscordService _discordService;
     private readonly ISkinService _skinService;
     private readonly IUserIdentityService _userIdentityService;
-    private readonly AvatarService _avatarService;
+    private readonly IAvatarService _avatarService;
     private readonly HttpClient _httpClient;
-    private readonly HytaleAuthService _hytaleAuthService;
-    private readonly GpuDetectionService _gpuDetectionService;
+    private readonly IHytaleAuthService _hytaleAuthService;
+    private readonly IGpuDetectionService _gpuDetectionService;
     private readonly string _appDir;
     
     private Config _config => _configService.Configuration;
@@ -79,10 +79,10 @@ public class GameLauncher : IGameLauncher
         IDiscordService discordService,
         ISkinService skinService,
         IUserIdentityService userIdentityService,
-        AvatarService avatarService,
+        IAvatarService avatarService,
         HttpClient httpClient,
-        HytaleAuthService hytaleAuthService,
-        GpuDetectionService gpuDetectionService,
+        IHytaleAuthService hytaleAuthService,
+        IGpuDetectionService gpuDetectionService,
         AppPathConfiguration appPath)
     {
         _configService = configService;

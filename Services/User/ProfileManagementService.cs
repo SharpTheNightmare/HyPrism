@@ -5,8 +5,6 @@ using HyPrism.Models;
 using HyPrism.Services.Core.Infrastructure;
 using HyPrism.Services.Game;
 using HyPrism.Services.Game.Instance;
-using HyPrism.Services.Game.Mod;
-
 namespace HyPrism.Services.User;
 
 /// <summary>
@@ -15,10 +13,10 @@ namespace HyPrism.Services.User;
 public class ProfileManagementService : IProfileManagementService
 {
     private readonly string _appDir;
-    private readonly ConfigService _configService;
-    private readonly SkinService _skinService;
-    private readonly InstanceService _instanceService;
-    private readonly UserIdentityService _userIdentityService;
+    private readonly IConfigService _configService;
+    private readonly ISkinService _skinService;
+    private readonly IInstanceService _instanceService;
+    private readonly IUserIdentityService _userIdentityService;
     private bool _profileFolderMigrationAttempted;
 
     /// <summary>
@@ -31,10 +29,10 @@ public class ProfileManagementService : IProfileManagementService
     /// <param name="userIdentityService">The user identity service.</param>
     public ProfileManagementService(
         AppPathConfiguration appPath,
-        ConfigService configService,
-        SkinService skinService,
-        InstanceService instanceService,
-        UserIdentityService userIdentityService)
+        IConfigService configService,
+        ISkinService skinService,
+        IInstanceService instanceService,
+        IUserIdentityService userIdentityService)
     {
         _appDir = appPath.AppDir;
         _configService = configService;

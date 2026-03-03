@@ -21,8 +21,7 @@ public class InstanceService : IInstanceService
 {
     private readonly string _appDir;
     
-    // Config Service dependency
-    private readonly ConfigService _configService;
+    private readonly IConfigService _configService;
     
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -36,7 +35,7 @@ public class InstanceService : IInstanceService
     /// </summary>
     /// <param name="appDir">The application data directory path.</param>
     /// <param name="configService">The configuration service for accessing settings.</param>
-    public InstanceService(string appDir, ConfigService configService)
+    public InstanceService(string appDir, IConfigService configService)
     {
         _appDir = appDir;
         _configService = configService;

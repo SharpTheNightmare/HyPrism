@@ -33,7 +33,7 @@ public class HytaleAuthService : IHytaleAuthService
     private readonly HttpClient _httpClient;
     private readonly string _appDir;
     private readonly IBrowserService _browserService;
-    private readonly ConfigService _configService;
+    private readonly IConfigService _configService;
     
     private string? _pendingCodeVerifier;
     private string? _pendingState;
@@ -45,7 +45,7 @@ public class HytaleAuthService : IHytaleAuthService
     /// </summary>
     public HytaleAuthSession? CurrentSession { get; private set; }
 
-    public HytaleAuthService(HttpClient httpClient, string appDir, IBrowserService browserService, ConfigService configService)
+    public HytaleAuthService(HttpClient httpClient, string appDir, IBrowserService browserService, IConfigService configService)
     {
         _httpClient = httpClient;
         _appDir = appDir;

@@ -12,8 +12,10 @@ namespace HyPrism.Services.User;
 public class ProfileService : IProfileService
 {
     private readonly string _appDataPath;
-    private readonly ConfigService _configService;
-    private readonly AvatarService? _avatarService;
+    private readonly IConfigService _configService;
+    private readonly IAvatarService? _avatarService;
+
+    private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProfileService"/> class.
@@ -21,7 +23,7 @@ public class ProfileService : IProfileService
     /// <param name="appDataPath">The application data directory path.</param>
     /// <param name="configService">The configuration service for accessing user settings.</param>
     /// <param name="avatarService">The avatar service for CachedAvatarPreviews lookups.</param>
-    public ProfileService(string appDataPath, ConfigService configService, AvatarService? avatarService = null)
+    public ProfileService(string appDataPath, IConfigService configService, IAvatarService? avatarService = null)
     {
         _appDataPath = appDataPath;
         _configService = configService;
@@ -57,7 +59,6 @@ public class ProfileService : IProfileService
         _configService.SaveConfig();
         return true;
     }
-    
 
     /// <inheritdoc/>
     public string GetUUID() => GetCurrentUuid();
@@ -120,7 +121,7 @@ public class ProfileService : IProfileService
                 return null;
 
             // 1. Check profile folder's avatar.png (most reliable, persisted)
-            var profile = _configService.Configuration.Profiles?.FirstOrDefault(p => p.UUID == uuid);
+            var profile = ReadProfilesFromCache().FirstOrDefault(p => p.UUID == uuid);
             if (profile != null)
             {
                 var profileDir = UtilityService.GetProfileFolderPath(_appDataPath, profile);
@@ -220,10 +221,10 @@ public class ProfileService : IProfileService
     {
         var uuid = GetCurrentUuid();
         var skinsPath = Path.Combine(_appDataPath, "skins", uuid);
-        
+
         if (!Directory.Exists(skinsPath))
             Directory.CreateDirectory(skinsPath);
-        
+
         return skinsPath;
     }
 
@@ -233,7 +234,7 @@ public class ProfileService : IProfileService
         try
         {
             var avatarDir = GetAvatarDirectory();
-            
+
             if (OperatingSystem.IsWindows())
             {
                 System.Diagnostics.Process.Start("explorer.exe", avatarDir);
@@ -246,7 +247,7 @@ public class ProfileService : IProfileService
             {
                 System.Diagnostics.Process.Start("open", avatarDir);
             }
-            
+
             return true;
         }
         catch
@@ -256,8 +257,6 @@ public class ProfileService : IProfileService
     }
 
     //  ── Profile cache helpers ───────────────────────────────────────────────
-
-    private static readonly JsonSerializerOptions _psJsonOpts = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
 
     private string GetProfileCachePath()
     {
@@ -270,13 +269,13 @@ public class ProfileService : IProfileService
     {
         var path = GetProfileCachePath();
         if (!File.Exists(path)) return new();
-        try { return JsonSerializer.Deserialize<List<Profile>>(File.ReadAllText(path), _psJsonOpts) ?? new(); }
+        try { return JsonSerializer.Deserialize<List<Profile>>(File.ReadAllText(path), JsonOpts) ?? new(); }
         catch { return new(); }
     }
 
     private void WriteProfilesToCache(List<Profile> profiles)
     {
-        try { File.WriteAllText(GetProfileCachePath(), JsonSerializer.Serialize(profiles, _psJsonOpts)); }
+        try { File.WriteAllText(GetProfileCachePath(), JsonSerializer.Serialize(profiles, JsonOpts)); }
         catch { }
     }
 
