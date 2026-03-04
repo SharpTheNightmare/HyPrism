@@ -478,24 +478,31 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ isOpen, onClose, o
                                 // Check if this is a duplicate (folder name differs from display name)
                                 const isDuplicate = profile.folderName && profile.folderName !== profile.name;
                                 
+                                // Panel base colour — used for both active and inactive.
+                                // For active: contrasts accent bg → visible clip + gradient.
+                                // For inactive: creates a ~11-unit contrast with hover-tinted bg
+                                // which is enough to see the clip and the text fade, similar to
+                                // how the accent clip looks on the active profile.
+                                const btnBg = 'rgba(28,28,30,0.97)';
+
                                 return (
                                     <div
                                         key={profile.id}
-                                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors group ${
-                                            isCurrentProfile 
-                                                ? '' 
+                                        className={`w-full flex items-center px-2 py-1.5 rounded-lg text-sm transition-colors group relative overflow-hidden ${
+                                            isCurrentProfile
+                                                ? ''
                                                 : 'text-white/60 hover:text-white hover:bg-white/5'
                                         }`}
                                         style={isCurrentProfile ? { backgroundColor: `${accentColor}20`, color: accentColor } : undefined}
                                     >
                                         <button
                                             onClick={() => !isCurrentProfile && handleSwitchProfile(profile.id)}
-                                            className="flex items-center gap-3 flex-1 min-w-0"
+                                            className="flex items-center gap-3 w-full min-w-0 overflow-hidden"
                                             disabled={isCurrentProfile}
                                         >
-                                            <div 
+                                            <div
                                                 className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
-                                                style={isCurrentProfile 
+                                                style={isCurrentProfile
                                                     ? { borderWidth: '2px', borderColor: accentColor, backgroundColor: profileAvatar ? 'transparent' : `${accentColor}20` }
                                                     : { borderWidth: '1px', borderColor: 'rgba(255,255,255,0.2)', backgroundColor: profileAvatar ? 'transparent' : 'rgba(255,255,255,0.05)' }
                                                 }
@@ -510,14 +517,24 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ isOpen, onClose, o
                                                     <User size={14} style={isCurrentProfile ? { color: accentColor } : { color: 'rgba(255,255,255,0.4)' }} />
                                                 )}
                                             </div>
-                                            <span className={`truncate ${isCurrentProfile ? 'font-medium' : ''}`}>
+                                            <span className={`whitespace-nowrap ${isCurrentProfile ? 'font-medium' : ''}`}>
                                                 {profile.name || 'Unnamed'}
                                                 {isDuplicate && (
                                                     <span className="text-white/30 text-xs ml-1">({profile.folderName?.replace(profile.name + ' ', '')})</span>
                                                 )}
                                             </span>
                                         </button>
-                                        <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {/* Gradient fade — fades to btnBg so there's no colour discontinuity */}
+                                        <div
+                                            className="absolute inset-y-0 right-0 w-28 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[5]"
+                                            style={{ background: `linear-gradient(to right, transparent, ${btnBg})` }}
+                                        />
+                                        {/* Full-height button container: overflow-hidden on parent clips
+                                            hover-highlight shape; btnBg matches hover bg so no dark smear */}
+                                        <div
+                                            className="absolute right-0 inset-y-0 flex items-center px-1 gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                            style={{ backgroundColor: btnBg }}
+                                        >
                                             <IconButton
                                                 size="sm"
                                                 onClick={(e) => handleDuplicateProfile(profile.id, e)}
@@ -551,7 +568,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ isOpen, onClose, o
                         <div className="px-2 pt-4 border-t border-white/[0.04] mx-2">
                             <Button
                                 onClick={handleCreateProfile}
-                                className="w-full border-dashed border-white/20 text-white/40 hover:text-white/60 hover:border-white/40"
+                                className="w-full border-dashed border-white/20 text-white/40 hover:text-white/60 hover:border-white/40 !h-auto py-2.5"
                             >
                                 <Plus size={14} />
                                 <span>{t('profiles.createNew')}</span>

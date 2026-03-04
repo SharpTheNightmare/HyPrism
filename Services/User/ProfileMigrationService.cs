@@ -10,6 +10,128 @@ namespace HyPrism.Services.User;
 public static class ProfileMigrationService
 {
     /// <summary>
+    /// Scans the profiles root directory for GUID-named folders that have no corresponding
+    /// entry in <paramref name="profiles"/> and reconstructs <see cref="Profile"/> metadata
+    /// from the embedded <c>*.sh</c> launch script and filesystem timestamps.
+    /// </summary>
+    /// <param name="profilesDir">The profiles root directory to scan.</param>
+    /// <param name="profiles">The current list of registered profiles (mutated in place).</param>
+    /// <returns><c>true</c> if any new profiles were added.</returns>
+    public static bool MigrateOrphanedFolders(string profilesDir, List<Profile> profiles)
+    {
+        if (!Directory.Exists(profilesDir))
+            return false;
+
+        bool changed = false;
+
+        foreach (var folder in Directory.GetDirectories(profilesDir))
+        {
+            var folderName = Path.GetFileName(folder);
+
+            // Only process GUID-named folders (ID-based layout)
+            if (!Guid.TryParse(folderName, out _))
+                continue;
+
+            // Skip if already tracked in meta
+            if (profiles.Any(p => string.Equals(p.Id, folderName, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            var profile = TryCreateProfileFromFolder(folder, folderName);
+            if (profile == null)
+            {
+                Logger.Warning("Profile", $"Could not reconstruct profile meta from orphaned folder: {folder}");
+                continue;
+            }
+
+            profiles.Add(profile);
+            changed = true;
+            Logger.Info("Profile", $"Recovered orphaned profile '{profile.Name}' ({profile.Id}) from disk");
+        }
+
+        return changed;
+    }
+
+    /// <summary>
+    /// Tries to reconstruct a <see cref="Profile"/> from a folder that exists on disk
+    /// but has no corresponding entry in <c>profiles.json</c>.
+    /// </summary>
+    private static Profile? TryCreateProfileFromFolder(string folder, string folderName)
+    {
+        try
+        {
+            string? profileId = null;
+            string? uuid = null;
+            string? name = null;
+
+            var shFile = Directory.GetFiles(folder, "*.sh").FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(shFile))
+            {
+                name = Path.GetFileNameWithoutExtension(shFile);
+
+                foreach (var line in File.ReadAllLines(shFile))
+                {
+                    if (line.Contains("HYPRISM_PROFILE_ID=", StringComparison.Ordinal))
+                        profileId = ExtractQuotedValue(line);
+                    else if (line.Contains("HYPRISM_PROFILE_UUID=", StringComparison.Ordinal))
+                        uuid = ExtractQuotedValue(line);
+                    else if (line.Contains("HYPRISM_PROFILE_NAME=", StringComparison.Ordinal) && string.IsNullOrWhiteSpace(name))
+                        name = ExtractQuotedValue(line);
+                }
+            }
+
+            // Fall back to folder name as ID if the .sh didn't have it
+            if (string.IsNullOrWhiteSpace(profileId))
+                profileId = folderName;
+
+            // We must have at least a UUID to create a valid profile
+            if (string.IsNullOrWhiteSpace(uuid))
+                return null;
+
+            if (string.IsNullOrWhiteSpace(name))
+                name = folderName;
+
+            bool isOfficial = File.Exists(Path.Combine(folder, "hytale_session.json"));
+
+            var createdAt = GetOldestFileTime(folder);
+
+            return new Profile
+            {
+                Id = profileId,
+                UUID = uuid,
+                Name = name,
+                IsOfficial = isOfficial,
+                TotalPlaytime = TimeSpan.Zero,
+                CreatedAt = createdAt
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.Warning("Profile", $"Error reconstructing profile from folder '{folder}': {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Returns the creation time of the oldest file (or subdirectory) inside <paramref name="folder"/>,
+    /// falling back to the folder's own creation time if no files are found.
+    /// </summary>
+    private static DateTime GetOldestFileTime(string folder)
+    {
+        try
+        {
+            var oldest = Directory.EnumerateFileSystemEntries(folder, "*", SearchOption.AllDirectories)
+                .Select(p => new FileInfo(p).CreationTimeUtc)
+                .DefaultIfEmpty(Directory.GetCreationTimeUtc(folder))
+                .Min();
+            return oldest;
+        }
+        catch
+        {
+            return Directory.GetCreationTimeUtc(folder);
+        }
+    }
+
+    /// <summary>
     /// Scans the profiles root directory for folders whose names do not match a GUID
     /// and attempts to match them to existing <paramref name="profiles"/> by name,
     /// then by embedded metadata, moving them to their correct ID-based location.

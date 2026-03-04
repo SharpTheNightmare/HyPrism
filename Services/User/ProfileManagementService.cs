@@ -173,6 +173,9 @@ public class ProfileManagementService : IProfileManagementService
 
             ProfileMigrationService.MigrateUnresolvedFolders(GetProfilesFolder(), profiles, _appDir);
 
+            if (ProfileMigrationService.MigrateOrphanedFolders(GetProfilesFolder(), profiles))
+                changed = true;
+
             if (changed)
                 SaveProfilesToCache(profiles);
         }
