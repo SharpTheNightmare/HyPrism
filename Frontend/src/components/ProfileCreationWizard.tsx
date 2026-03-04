@@ -17,6 +17,7 @@ const NICK_REGEX = /^[a-zA-Z0-9_-]{3,16}$/;
 interface ProfileCreationWizardProps {
     onComplete: (profile: Profile) => void;
     onCancel: () => void;
+    initialStep?: WizardStep;
 }
 
 function generateRandomName(): string {
@@ -31,11 +32,11 @@ function generateUUID(): string {
     });
 }
 
-export const ProfileCreationWizard: React.FC<ProfileCreationWizardProps> = ({ onComplete, onCancel }) => {
+export const ProfileCreationWizard: React.FC<ProfileCreationWizardProps> = ({ onComplete, onCancel, initialStep = 'choose-type' }) => {
     const { t } = useTranslation();
     const { accentColor } = useAccentColor();
 
-    const [step, setStep] = useState<WizardStep>('choose-type');
+    const [step, setStep] = useState<WizardStep>(initialStep);
     const [name, setName] = useState(generateRandomName());
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
