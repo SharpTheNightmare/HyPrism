@@ -263,10 +263,9 @@ export interface SettingsSnapshot {
   minimizeToTray?: boolean | null;
 }
 
-// NOTE: Manually changed from the auto-generated `{ updates: Record<string, JsonElement> }`.
-// The C# side uses [JsonExtensionData], so any flat JSON {"key":value} is captured into Updates.
-// Keep this when regenerating ipc.ts — see SettingsRequests.cs and TypeScriptEmitter.cs.
-export type UpdateSettingsRequest = Record<string, unknown>;
+export interface UpdateSettingsRequest {
+  updates: Record<string, JsonElement>;
+}
 
 export interface MirrorSpeedTestResult {
   mirrorId: string;

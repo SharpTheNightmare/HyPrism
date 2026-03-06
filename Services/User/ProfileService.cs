@@ -299,7 +299,6 @@ public class ProfileService : IProfileService
         WriteProfilesToCache(profiles);
     }
 
-    // ── Legacy IProfileService methods (used internally; management ops go through IProfileManagementService) ──
 
     /// <inheritdoc/>
     public List<Profile> GetProfiles() => ReadProfilesFromCache();

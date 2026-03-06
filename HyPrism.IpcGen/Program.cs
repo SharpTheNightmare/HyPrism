@@ -5,7 +5,7 @@ using HyPrism.IpcGen;
 // MSBuildLocator must be called before any Roslyn MSBuild API is touched.
 MSBuildLocator.RegisterDefaults();
 
-// ── CLI args ─────────────────────────────────────────────────────────────────
+#region CLI args
 string? projectPath = null;
 string? outputPath  = null;
 
@@ -21,7 +21,9 @@ if (projectPath is null || outputPath is null)
     return 1;
 }
 
-// ── Hash-based cache: skip if IpcService.cs hasn't changed ───────────────────
+#endregion
+
+#region Hash-based cache
 var ipcServicePath = Path.Combine(Path.GetDirectoryName(projectPath)!,
     "Services", "Core", "Ipc", "IpcService.cs");
 
@@ -39,7 +41,9 @@ if (File.Exists(ipcServicePath) && File.Exists(outputPath))
     }
 }
 
-// ── Load the project via Roslyn MSBuildWorkspace ──────────────────────────────
+#endregion
+
+#region Load the project via Roslyn MSBuildWorkspace
 Console.WriteLine("[IpcGen] Loading project...");
 
 using var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>
@@ -60,7 +64,9 @@ if (compilation is null)
     return 1;
 }
 
-// ── Collect IPC methods and map types ────────────────────────────────────────
+#endregion
+
+#region Collect IPC methods and map types
 Console.WriteLine("[IpcGen] Collecting IPC handlers...");
 
 var mapper    = new CSharpTypeMapper();
@@ -79,7 +85,9 @@ mapper.FlushQueue();
 Console.WriteLine($"[IpcGen] Found {methods.Count} channels, " +
     $"{mapper.Interfaces.Count} TypeScript interfaces.");
 
-// ── Generate ipc.ts ───────────────────────────────────────────────────────────
+#endregion
+
+#region Generate ipc.ts
 Console.WriteLine($"[IpcGen] Writing {outputPath}...");
 
 var ts = TypeScriptEmitter.Emit(methods, mapper.Interfaces);
@@ -96,3 +104,5 @@ if (File.Exists(ipcServicePath))
 
 Console.WriteLine("[IpcGen] Done.");
 return 0;
+
+#endregion

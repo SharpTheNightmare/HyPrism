@@ -53,7 +53,7 @@ public class InstanceService : IInstanceService
     /// <param name="config">The configuration object (parameter kept for API compatibility).</param>
     private void SaveConfig(Config config) => _configService.SaveConfig();
 
-    // ── Instance cache (instances.json) ─────────────────────────────────────
+    #region Instance cache (instances.json)
 
     /// <summary>Returns the path to the instance cache file.</summary>
     private string GetInstanceCachePath() => Path.Combine(GetInstanceRoot(), "instances.json");
@@ -579,7 +579,9 @@ public class InstanceService : IInstanceService
 
         return GetInstancePath(branch, version);
     }
-    
+
+    #endregion
+
     #region Legacy Config Migration
 
     /// <summary>

@@ -10,7 +10,7 @@ namespace HyPrism.Services.Game.Sources;
 /// Service for automatically discovering mirror configuration from a URL.
 /// Attempts to detect the mirror type (pattern/json-index) and build a MirrorMeta schema.
 /// </summary>
-public class MirrorDiscoveryService
+public class MirrorDiscoveryService : IMirrorDiscoveryService
 {
     private readonly HttpClient _httpClient;
     private const int TimeoutSeconds = 10;
@@ -54,17 +54,6 @@ public class MirrorDiscoveryService
         }
         
         return await _httpClient.SendAsync(request, ct);
-    }
-
-    /// <summary>
-    /// Result of mirror discovery attempt.
-    /// </summary>
-    public class DiscoveryResult
-    {
-        public bool Success { get; set; }
-        public string? Error { get; set; }
-        public MirrorMeta? Mirror { get; set; }
-        public string? DetectedType { get; set; }
     }
 
     /// <summary>

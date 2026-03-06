@@ -44,13 +44,16 @@ public class ProfileManagementService : IProfileManagementService
         EnsureProfileStorageUpgraded();
     }
 
-    // ── Profile cache (profiles.json) ─────────────────────────────────────
+    #endregion
+
+    #region Profile cache (profiles.json)
 
     private static readonly JsonSerializerOptions _profileJsonOpts = new()
     {
         PropertyNameCaseInsensitive = true,
         WriteIndented = true
     };
+
     #endregion
 
     /// <summary>Returns the path to the profile cache file inside the profiles folder.</summary>

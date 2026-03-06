@@ -706,7 +706,7 @@ public class InstanceMigrationService : IInstanceMigrationService
         }
     }
 
-    // ── Private helpers (legacy data reading) ───────────────────────────────
+    #region Private helpers (legacy data reading)
 
     /// <summary>
     /// Gets the list of legacy installation root directories to search for migrations.
@@ -873,4 +873,6 @@ public class InstanceMigrationService : IInstanceMigrationService
 
         return null;
     }
+
+    #endregion
 }

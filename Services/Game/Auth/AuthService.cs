@@ -13,7 +13,7 @@ namespace HyPrism.Services.Game.Auth;
 /// Supports both the /game-session/child and /game-session endpoints
 /// for backwards compatibility with different auth server versions.
 /// </remarks>
-public class AuthService
+public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
     private readonly string[] _authServerUrls;

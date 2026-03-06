@@ -43,7 +43,7 @@ public class VersionCache
     /// <summary>Clears the in-memory cache, forcing the next read from disk.</summary>
     public void Invalidate() => Current = null;
 
-    // ─── Path helpers ─────────────────────────────────────────────────────────
+    #region Path helpers
 
     /// <summary>Returns the path to the on-disk versions cache file.</summary>
     public string GetSnapshotPath()
@@ -53,7 +53,9 @@ public class VersionCache
     public string GetPatchSnapshotPath()
         => Path.Combine(_appDir, "Cache", "Game", "patches.json");
 
-    // ─── Versions snapshot ────────────────────────────────────────────────────
+    #endregion
+
+    #region Versions snapshot
 
     /// <summary>
     /// Checks if a specific branch's data in the cache is fresh (within <paramref name="maxAge"/>).
@@ -224,7 +226,9 @@ public class VersionCache
         return snapshot;
     }
 
-    // ─── Patches snapshot ─────────────────────────────────────────────────────
+    #endregion
+
+    #region Patches snapshot
 
     /// <summary>Loads the patches snapshot from disk, or returns <c>null</c> if absent or corrupt.</summary>
     public PatchesCacheSnapshot? LoadPatches()
@@ -284,4 +288,6 @@ public class VersionCache
             Logger.Warning("Version", $"Failed to save patches cache: {ex.Message}");
         }
     }
+
+    #endregion
 }

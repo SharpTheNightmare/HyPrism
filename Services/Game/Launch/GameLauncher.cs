@@ -342,7 +342,6 @@ public class GameLauncher : IGameLauncher
 
     private async Task PatchClientIfNeededAsync(string versionPath)
     {
-        // ── Official server mode: restore originals if previously patched ──
         if (IsOfficialServerMode())
         {
             bool clientPatched = ClientPatcher.IsClientPatched(versionPath);
@@ -382,7 +381,6 @@ public class GameLauncher : IGameLauncher
             return;
         }
 
-        // ── Custom / default server mode: patch binaries ──
         var effectiveAuthDomain = GetEffectiveCustomAuthDomain(logFallback: true);
         if (string.IsNullOrWhiteSpace(effectiveAuthDomain)) return;
 
@@ -405,7 +403,6 @@ public class GameLauncher : IGameLauncher
 
             if (useDualAuth)
             {
-                // ── DualAuth mode (experimental): patch client only, use Java Agent for server ──
 
                 // If server JAR was previously patched by legacy mode, restore it first
                 // so DualAuth agent works with the original (unmodified) JAR.
@@ -481,7 +478,6 @@ public class GameLauncher : IGameLauncher
             }
             else
             {
-                // ── Legacy mode (default/stable): patch both client binary AND server JAR ──
                 // This is the proven approach — statically modifies the JAR to replace
                 // sessions.hytale.com with sessions.<custom-domain>.
                 // Also clear DualAuth agent path to prevent agent injection.
