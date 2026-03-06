@@ -18,6 +18,13 @@
  */
 module.exports = {
     onStartup(_host) {
+        const { app } = require('electron');
+        app.setName('HyPrism');
+        process.title = 'HyPrism';
+        if (process.platform === 'win32') {
+            app.setAppUserModelId('io.github.hyprismteam.HyPrism');
+        }
+
         const http = require('http');
         const _origCreate = http.createServer;
 
