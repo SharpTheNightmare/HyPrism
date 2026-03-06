@@ -181,7 +181,7 @@ export const BulkUpdateModal: React.FC<BulkUpdateModalProps> = ({
                                 <img src={iconUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <Package size={18} className="text-white/30" />
+                                  <Package size={18} className="text-white opacity-30" />
                                 </div>
                               )}
                             </div>
@@ -384,7 +384,7 @@ export const BulkDeleteModal: React.FC<BulkDeleteModalProps> = ({
                                 <img src={iconUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <Package size={18} className="text-white/30" />
+                                  <Package size={18} className="text-white opacity-30" />
                                 </div>
                               )}
                             </div>

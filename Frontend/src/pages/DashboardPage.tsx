@@ -556,7 +556,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = memo((props) => {
                   className="mt-3"
                 >
                   <div className="bg-orange-400/10 rounded-full px-4 py-1.5 border border-orange-400/20 flex items-center gap-1.5">
-                    <ShieldAlert size={12} className="text-orange-400/80 flex-shrink-0" />
+                    <ShieldAlert size={12} className="text-orange-400 opacity-80 flex-shrink-0" />
                     <span className="text-orange-400/80 text-[11px] whitespace-nowrap">
                       {t('main.officialServerBlocked')}
                     </span>
@@ -645,7 +645,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = memo((props) => {
                     ) : (
                       <div className="flex items-center justify-between text-[10px]">
                         <div className="flex items-center gap-2">
-                          <Loader2 size={12} className="animate-spin text-white/70" />
+                          <Loader2 size={12} className="animate-spin text-white opacity-70" />
                           <span className="text-white/60">{getLaunchStateLabel()}</span>
                         </div>
                         <span className="text-white/50 font-mono">{props.speed && props.speed > 0 ? `${formatBytes(props.downloaded)} • ${formatBytes(props.speed)}/s` : `${formatBytes(props.downloaded)}`}</span>

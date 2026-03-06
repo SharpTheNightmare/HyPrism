@@ -377,7 +377,7 @@ export const InstancesPage: React.FC<InstancesPageProps> = (props) => {
                         ) : (
                             <div className="flex justify-between items-center text-[10px]">
                               <div className="flex items-center gap-2">
-                                <Loader2 size={12} className="animate-spin text-white/70" />
+                                <Loader2 size={12} className="animate-spin text-white opacity-70" />
                                 <span className="text-white/60">{launchDetail ? (t(launchDetail) !== launchDetail ? t(launchDetail) : launchDetail) : (launchState || t('launch.state.preparing'))}</span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -469,7 +469,7 @@ export const InstancesPage: React.FC<InstancesPageProps> = (props) => {
               </>
             ) : page.instances.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center rounded-2xl glass-panel-static-solid">
-                <HardDrive size={64} className="mb-4 text-white/20" />
+                <HardDrive size={64} className="mb-4 text-white opacity-20" />
                 <p className="text-xl font-medium text-white/70">{t('instances.noInstances')}</p>
                 <p className="text-sm mt-2 text-white/40 text-center max-w-xs">{t('instances.createInstanceHint')}</p>
                 <Button variant="primary" onClick={() => page.setShowCreateModal(true)} className="mt-6 px-6 py-3 font-bold shadow-lg">

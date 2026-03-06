@@ -80,7 +80,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                 <span className="text-white/50 text-sm">({currentLangConfig.name})</span>
               </div>
             </div>
-            <ChevronDown size={16} className={`text-white/40 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={`text-white opacity-40 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
           </button>
 
           <AnimatePresence>
@@ -138,7 +138,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                 </span>
               )}
             </div>
-            <ChevronDown size={16} className={`text-white/40 transition-transform ${isBranchOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={`text-white opacity-40 transition-transform ${isBranchOpen ? 'rotate-180' : ''}`} />
           </button>
 
           <AnimatePresence>
@@ -192,7 +192,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       {/* Toggle Settings */}
       <div className="space-y-3">
         <SettingsToggleCard
-          icon={<Power size={16} className="text-white/70" />}
+          icon={<Power size={16} className="text-white opacity-70" />}
           title={t('settings.generalSettings.closeLauncher')}
           description={t('settings.generalSettings.closeLauncherHint')}
           checked={closeAfterLaunch}
@@ -200,7 +200,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         />
 
         <SettingsToggleCard
-          icon={<FlaskConical size={16} className="text-white/70" />}
+          icon={<FlaskConical size={16} className="text-white opacity-70" />}
           title={t('settings.generalSettings.showAlphaMods')}
           description={t('settings.generalSettings.showAlphaModsHint')}
           checked={showAlphaMods}
@@ -209,7 +209,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
 
         {onlineMode && profileLoaded && !isActiveProfileOfficial && authMode !== 'official' && (
           <SettingsToggleCard
-            icon={<Server size={16} className="text-white/70" />}
+            icon={<Server size={16} className="text-white opacity-70" />}
             title={t('settings.generalSettings.legacyPatching')}
             description={t('settings.generalSettings.legacyPatchingHint')}
             checked={!useDualAuth}

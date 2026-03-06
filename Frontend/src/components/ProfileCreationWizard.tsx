@@ -169,7 +169,7 @@ export const ProfileCreationWizard: React.FC<ProfileCreationWizardProps> = ({ on
                             {/* Unofficial */}
                             <SelectionCard
                                 onClick={handleChooseUnofficial}
-                                icon={<User size={20} className="text-white/70" />}
+                                icon={<User size={20} className="text-white opacity-70" />}
                                 title={t('profiles.wizard.unofficial')}
                                 description={t('profiles.wizard.unofficialDesc')}
                             />
@@ -267,7 +267,7 @@ export const ProfileCreationWizard: React.FC<ProfileCreationWizardProps> = ({ on
                         className="flex flex-col items-center gap-6 max-w-md w-full"
                     >
                         <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/5">
-                            <User size={32} className="text-white/50" />
+                            <User size={32} className="text-white opacity-50" />
                         </div>
 
                         <h2 className="text-xl font-bold text-white">

@@ -154,7 +154,7 @@ export const InlineModBrowser: React.FC<InlineModBrowserProps> = (props) => {
 
           {/* Search input */}
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white opacity-40" />
             <input
               type="text"
               value={searchQuery}
@@ -254,7 +254,7 @@ export const InlineModBrowser: React.FC<InlineModBrowserProps> = (props) => {
               <div className="space-y-1 max-h-24 overflow-y-auto">
                 {downloadJobs.map(job => (
                   <div key={job.id} className="flex items-center gap-2 text-xs">
-                    {job.status === 'running' && <Loader2 size={10} className="animate-spin text-white/60" />}
+                    {job.status === 'running' && <Loader2 size={10} className="animate-spin text-white opacity-60" />}
                     {job.status === 'success' && <Check size={10} className="text-green-400" />}
                     {job.status === 'error' && <AlertCircle size={10} className="text-red-400" />}
                     {job.status === 'pending' && <div className="w-2.5 h-2.5 rounded-full bg-white/20" />}
@@ -370,7 +370,7 @@ export const InlineModBrowser: React.FC<InlineModBrowserProps> = (props) => {
                       {mod.iconUrl ? (
                         <img src={mod.iconUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                       ) : (
-                        <Package size={20} className="text-white/30" />
+                        <Package size={20} className="text-white opacity-30" />
                       )}
                     </div>
 

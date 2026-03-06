@@ -92,9 +92,9 @@ export const NewsPage: React.FC<NewsPageProps> = memo(({ getNews }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <Newspaper size={22} className="text-white/80" />
+          <Newspaper size={22} className="text-white opacity-80" />
           <h1 className="text-xl font-bold text-white">{t('news.title')}</h1>
-          {isRefreshing && <RefreshCw size={14} className="animate-spin text-white/40" />}
+          {isRefreshing && <RefreshCw size={14} className="animate-spin text-white opacity-40" />}
         </div>
 
         {/* Source filter — segmented control with accent slider */}
@@ -145,7 +145,7 @@ export const NewsPage: React.FC<NewsPageProps> = memo(({ getNews }) => {
                   {/* Background Image or Placeholder */}
                   {item.source === 'hyprism' ? (
                     <div className="absolute inset-0 bg-gradient-to-br from-[#2c2c2e] to-[#1c1c1e] flex items-center justify-center">
-                      <Github size={64} className="text-white/10" />
+                      <Github size={64} className="text-white opacity-10" />
                     </div>
                   ) : item.imageUrl ? (
                     <img

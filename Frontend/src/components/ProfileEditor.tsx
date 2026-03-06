@@ -509,7 +509,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ isOpen, onClose, o
                                                         alt="Avatar"
                                                     />
                                                 ) : (
-                                                    <User size={14} style={isCurrentProfile ? { color: accentColor } : { color: 'rgba(255,255,255,0.4)' }} />
+                                                    <User size={14} style={isCurrentProfile ? { color: accentColor } : { color: '#ffffff', opacity: 0.4 }} />
                                                 )}
                                             </div>
                                             <span className={`whitespace-nowrap truncate ${isCurrentProfile ? 'font-medium' : ''}`}>
@@ -629,7 +629,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ isOpen, onClose, o
                         <div className="flex-1 p-6 overflow-y-auto">
                             {isLoading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <RefreshCw size={32} className="animate-spin text-white/40" />
+                                    <RefreshCw size={32} className="animate-spin text-white opacity-40" />
                                 </div>
                             ) : (
                                 <div className="space-y-6">

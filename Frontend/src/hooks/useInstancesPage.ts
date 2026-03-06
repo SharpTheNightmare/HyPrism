@@ -628,8 +628,6 @@ export function useInstancesPage(options: UseInstancesPageOptions) {
   // ============================================================================
   
   const handleContextMenuInstance = useCallback((inst: InstalledVersionInfo) => {
-    setSelectedInstance(inst);
-    if (inst.id) ipc.instance.select({ id: inst.id }).catch(console.error);
     setInlineMenuInstanceId(inst.id);
     setShowInstanceMenu(false);
   }, []);

@@ -114,9 +114,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => settings.setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${settings.activeTab === tab.id
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,opacity] ${settings.activeTab === tab.id
+                    ? 'bg-white/10 text-white opacity-100'
+                    : 'text-white opacity-60 hover:opacity-100 hover:bg-white/5'
                   }`}
                   style={settings.activeTab === tab.id ? { backgroundColor: `${settings.accentColor}20`, color: settings.accentColor } : {}}
                 >
