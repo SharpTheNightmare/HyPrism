@@ -95,11 +95,15 @@ dist/
 dmg-arm64/Applications
 scripts/build-linux-all-ubuntu.sh
 # Python debug scripts
-*.py
 __pycache__/
 *.pyc
 *.hash
+tu.sh
+# Python debug scripts
+__pycache__/
+*.pyc
 
 # Virtual environments
 .venv/
 venv/
+Properties/linux/flathub/nuget-sources.json
