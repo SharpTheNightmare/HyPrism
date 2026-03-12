@@ -90,7 +90,8 @@ SOURCES=()
 # default nuget.org feed; instead we will force restore to use only the
 # sources provided via `--sources`.
 IN_FLATPAK=0
-if [[ -n "$FLATPAK_ID" || -f /run/.flatpak-info ]]; then
+# Use parameter expansion to avoid unbound-variable errors under "set -u".
+if [[ -n "${FLATPAK_ID:-}" || -f /run/.flatpak-info ]]; then
     IN_FLATPAK=1
 fi
 
