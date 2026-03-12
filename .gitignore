@@ -83,8 +83,6 @@ Properties/linux/flatpak/bundle
 repo
 build-dir
 flathub-bundle.tar.gz
-# Generated Flathub manifest (do not commit a static copy)
-Properties/linux/flathub/io.github.hyprismteam.HyPrism.yml
 
 # scripts
 scripts/run.sh
@@ -107,3 +105,4 @@ __pycache__/
 .venv/
 venv/
 Properties/linux/flathub/nuget-sources.json
+Properties/linux/flathub/generated-sources.json

@@ -26,23 +26,23 @@ fi
 
 # build final manifest by combining header and module fragments
 # header comes from flatpak yaml, modules from flathub module file
-FLATPAK="$(dirname "$MANIFEST")/../flatpak/io.github.hyprismteam.HyPrism.yml"
-MODULE_FILE="$(dirname "$MANIFEST")/io.github.hyprismteam.HyPrism.module.yml"
+# FLATPAK="$(dirname "$MANIFEST")/../flatpak/io.github.hyprismteam.HyPrism.yml"
+# MODULE_FILE="$(dirname "$MANIFEST")/io.github.hyprismteam.HyPrism.module.yml"
 
-if [[ ! -f "$FLATPAK" ]]; then
-    echo "error: flatpak header file not found: $FLATPAK" >&2
-    exit 1
-fi
-if [[ ! -f "$MODULE_FILE" ]]; then
-    echo "error: module file not found: $MODULE_FILE" >&2
-    exit 1
-fi
+# if [[ ! -f "$FLATPAK" ]]; then
+#     echo "error: flatpak header file not found: $FLATPAK" >&2
+#     exit 1
+# fi
+# if [[ ! -f "$MODULE_FILE" ]]; then
+#     echo "error: module file not found: $MODULE_FILE" >&2
+#     exit 1
+# fi
 
-# capture header (everything before the modules: directive)
-# use sed to stop before printing the modules: line
-header=$(sed '/^modules:/q' "$FLATPAK")
-# remove any trailing modules: if accidentally included
-header=$(printf '%s' "$header" | sed '/^modules:$/d')
+# # capture header (everything before the modules: directive)
+# # use sed to stop before printing the modules: line
+# header=$(sed '/^modules:/q' "$FLATPAK")
+# # remove any trailing modules: if accidentally included
+# header=$(printf '%s' "$header" | sed '/^modules:$/d')
 
 # capture modules section from module file
 # replace placeholders on url/sha lines, remove leading blank then drop first line (modules:)
@@ -52,17 +52,17 @@ modules=$(sed \
   | sed '1{/^$/d}' \
   | sed '1d')
 
-# write combined manifest
-{
-    printf '%s
-' "$header"
-    printf 'modules:
-'
-    printf '%s
-' "$modules"
-} >"$MANIFEST"
+# # write combined manifest
+# {
+#     printf '%s
+# ' "$header"
+#     printf 'modules:
+# '
+#     printf '%s
+# ' "$modules"
+# } >"$MANIFEST"
 
-echo "Manifest regenerated and updated: $MANIFEST"
+# echo "Manifest regenerated and updated: $MANIFEST"
 
 echo "Generating nuget sources file for Flathub manifest..."
 
@@ -106,57 +106,6 @@ python3 Properties/linux/flathub/flatpak-dotnet-generator.py \
     --dotnet "$dotnet" \
     Properties/linux/flathub/nuget-sources.json "$project_file"
 
-# ---------------------------------------------------------------------------
-# Ensure the standard runtime packages are present in the generated JSON.
-# When build occurs inside the Flatpak builder we restrict restore sources to
-# the contents of `nuget-sources/`.  `dotnet publish` still expects a few
-# Microsoft runtime packages (linux-x64) which are *not* restored by the
-# earlier python tool because they live in the shared framework rather than the
-# project itself.  Without them the builder reports errors like:
-#
-#   error NU1101: Unable to find package Microsoft.NETCore.App.Runtime.linux-x64
-#
-# We can compute the exact package version from the SDK installed in the
-# extension and add entries for the three missing IDs.
+pipx install git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=node
 
-# query dotnet inside the same Flatpak environment used by the generator
-runtime_pkg_version=$(flatpak run \
-    --env=DOTNET_CLI_TELEMETRY_OPTOUT=true \
-    --env=DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true \
-    --command=sh \
-    --runtime=org.freedesktop.Sdk//$runtime_version \
-    --share=network \
-    --filesystem=host \
-    org.freedesktop.Sdk.Extension.dotnet$dotnet//$runtime_version \
-    -c "PATH=\"\$PATH:/usr/lib/sdk/dotnet$dotnet/bin\" LD_LIBRARY_PATH=\"\$LD_LIBRARY_PATH:/usr/lib/sdk/dotnet$dotnet/lib\" dotnet --list-runtimes" \
-  | awk '/Microsoft\.NETCore\.App/ {print $2; exit}')
-
-if [[ -z "$runtime_pkg_version" ]]; then
-    echo "warning: could not determine runtime package version" >&2
-else
-    echo "Detected runtime package version: $runtime_pkg_version"
-    for pkg in \
-        Microsoft.NETCore.App.Runtime.linux-x64 \
-        Microsoft.AspNetCore.App.Runtime.linux-x64 \
-        Microsoft.NETCore.App.Crossgen2.linux-x64; do
-        # avoid duplicate entries if the JSON already contains this package
-        if grep -q "\"$pkg\".*\"$runtime_pkg_version\"" Properties/linux/flathub/nuget-sources.json; then
-            continue
-        fi
-        url="https://api.nuget.org/v3-flatcontainer/$pkg/$runtime_pkg_version/$pkg.$runtime_pkg_version.nupkg"
-        tmpfile=$(mktemp)
-        curl -fsSL "$url" -o "$tmpfile" || {
-            echo "failed to download $url" >&2
-            rm -f "$tmpfile"
-            continue
-        }
-        sha512=$(sha512sum "$tmpfile" | awk '{print $1}')
-        rm -f "$tmpfile"
-        jq --arg url "$url" --arg sha512 "$sha512" \
-            --arg fname "$pkg.$runtime_pkg_version.nupkg" \
-            '. += [{"type":"file","url":$url,"sha512":$sha512,"dest":"nuget-sources","dest-filename":$fname}]' \
-            Properties/linux/flathub/nuget-sources.json \
-            > Properties/linux/flathub/nuget-sources.json.tmp && \
-            mv Properties/linux/flathub/nuget-sources.json.tmp Properties/linux/flathub/nuget-sources.json
-    done
-fi
+flatpak-node-generator --output "Properties/linux/flathub/generated-sources.json" npm Frontend/package-lock.json
