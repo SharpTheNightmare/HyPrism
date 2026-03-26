@@ -26,6 +26,7 @@ Downloads are available in [Releases](https://github.com/yyyumeniku/HyPrism/rele
 
 **Requirements:**
 - .NET 10.0 SDK
+- Node.JS 20+
 
 **Build:**
 ```bash
